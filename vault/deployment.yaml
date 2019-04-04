@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vault
+  labels:
+    app: vault
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: vault
+  template:
+    metadata:
+      labels:
+        app: vault
+    spec:
+      containers:
+      - name: vault
+        image: "vault:1.1.0"
+        command: ["vault", "server", "-config", "/vault/config/config.json"]
+        ports:
+        - name: api
+          containerPort: 8200
+          protocol: TCP
+        volumeMounts:
+        - name: vault-config
+          mountPath: /vault/config/config.json
+          subPath: config.json
+        securityContext:
+          capabilities:
+            add:
+            - IPC_LOCK
+      - name: consul-agent
+        image: "consul:1.4.4"
+        env:
+        - name: GOSSIP_ENCRYPTION_KEY
+          valueFrom:
+              secretKeyRef:
+                name: consul
+                key: gossip-encryption-key
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        args:
+        - "agent"
+        - "-retry-join=consul.$(NAMESPACE).svc.cluster.local"
+        - "-encrypt=$(GOSSIP_ENCRYPTION_KEY)"
+        - "-domain=cluster.local"
+        - "-datacenter=dc1"
+        - "-disable-host-node-id"
+      volumes:
+      - name: vault-config
+        configMap:
+          name: vault
