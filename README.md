@@ -12,6 +12,8 @@ In comes Hashicorp’s Vault, a solution that enables the secure store of secret
 ### Deployment topology
 ![Deployment topology](docs/images/deployment-topology.jpg "Deployment topology")
 
+Consul pods function in this deployment is to serve as the storage backend for Vault. This means that all content stored for persistence in Vault is encrypted by Vault, and written to the storage backend at rest.
+
 Please refer [consul/README.md](consul/README.md) for deploying Consul cluster and [vault/README.md](vault/README.md) for deploying Vault cluster on Kubernetes.   
 In additional, you can refer [Vault Reference Architecture](https://learn.hashicorp.com/vault/operations/ops-reference-architecture) for more details.
 
