@@ -1,27 +1,45 @@
-Create policies
+## Configure Vault
+
+This guide will walk you through configure Vault policies and user to secure your secrets.
+
+Login to Vault with `root` token:
+```bash
+$ export VAULT_ADDR=http[s]//<vault-address>:<vault-port>
+$ vault login
+Token (will be hidden): <enter root token here>
+```
+* Create admin policy:
 ```bash
 vault policy write admin admin.hcl
-vault policy write team-a-readonly team-a-readonly.hcl
-vault policy write team-a-admin team-a-admin.hcl
 ```
-Enable auth methods
+* Enable auth methods
 ```bash
 vault auth enable userpass
 vault auth enable approle
 ```
-Create user
+* Create user accsociated with policy `admin`
 ```bash
 vault write auth/userpass/users/nthienan \
   password=123456 \
   policies="admin" \
   metadata=Description="admin user"
 ```
+There is a recommended (a best practice) that `root` token should not be used for any Vault operations except initialize operations. After that `root` token should be revoked and cannot be used anymore.
+
 Login as `nthienan` user:
 ```bash
 $ vault login -method=userpass username=nthienan
-Password (will be hidden): <type admin's password>
+Password (will be hidden): <type nthienan's password>
 ```
-Now we have to create a Role that will generate tokens associated with that policy, and retrieve the token:
+AppRole is a secure introduction method to establish machine identity. In AppRole, in order for the application to get a token, it would need to login using a Role ID (which is static, and associated with a policy), and a Secret ID (which is dynamic, one time use, and can only be requested by a previously authenticated user/system.   
+Let's creat necessary policies for team-a:
+```bash
+vault policy write team-a-readonly team-a-readonly.hcl
+vault policy write team-a-admin team-a-admin.hcl
+```
+In this case, tokens assigned to the `team-a-readonly` policy would have permission to read a secret on the `secret/team-a/*` path.
+
+Now we have to create a role that will generate tokens associated with policy `team-a-readonly`
 ```bash
 vault write auth/approle/role/team-a \
 	secret_id_ttl=60m \
@@ -29,22 +47,33 @@ vault write auth/approle/role/team-a \
 	token_max_ttl=120m \
 	policies="team-a-readonly"
 ```
+Read role id and take it down for later steps
 ```bash
 $ vault read auth/approle/role/team-a/role-id
 Key        Value
 ---        -----
 role_id    84092a58-fcfb-ea53-a13e-628bd43bc966
 ```
-Note that in this case, the tokens generated through this policy have a time-to-live of 15 minutes. That means that after 15 minutes, that token is expired and can’t be used anymore. If you’r Jenkins jobs are shorted, you can adjust that time to live to increase security.
+Note that in this case, the tokens generated through this role have a time-to-live of 15 minutes. That means that after 15 minutes, that token is expired and can’t be used anymore. If your Jenkins jobs are shorted, you can adjust that time to live to increase security.
 
+Let’s write secrets that our Jenkins job will consume:
 ```bash
 vault kv put kv/team-a/mongodb username=mongo_root password=123456
 ```
-Now Jenkins will need permissions to retrieve Secret IDs for our newly created role. Jenkins shouldn’t be able to access the secret itself, list other Secret IDs, or even the Role ID.
+Now Jenkins will need permissions to retrieve role's secret-id for our newly created role. Jenkins shouldn’t be able to access the secret itself, list other Secret IDs, or even the Role ID.
 ```bash
 vault policy write jenkins jenkins.hcl
 ```
 And generate a token for Jenkins to login into Vault. This token should have a relatively large TTL, but will have to be rotated
 ```bash
-vault token create -policy=jenkins -ttl=24h
+vault token create -policy=jenkins -ttl=365d
 ```
+In this way we’re minimizing attack vectors:
+* Jenkins only knows it’s Vault Token (and potentially the role-id) but doesn’t know the secret-id, which is generated at pipeline runtime and it’s for one time use only.
+* The role-id can be stored in the Jenkinsfile. Without a token and a secret-id has no use.
+* The secret-id is dynamic and one time use only, and only lives for a short period of time while it’s requested and a login process is carried out to obtain a token for the role.
+* The role token is short lived, and it will be useless once the pipeline finishes. It can even be revoked once you’re finished with your pipeline.
+
+To better illustrate please refer picture below
+
+![ACL strategy](../docs/images/acl-strategy.jpg "ACL strategy")
