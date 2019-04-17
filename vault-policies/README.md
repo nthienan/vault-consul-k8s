@@ -58,7 +58,9 @@ Note that in this case, the tokens generated through this role have a time-to-li
 
 Let’s write secrets that our Jenkins job will consume:
 ```bash
-vault kv put kv/team-a/mongodb username=mongo_root password=123456
+$ vault secrets enable -version=2 kv
+Success! Enabled the kv secrets engine at: kv/
+$ vault kv put kv/team-a/mongodb username=mongo_root password=123456
 ```
 Now Jenkins will need permissions to retrieve role's secret-id for our newly created role. Jenkins shouldn’t be able to access the secret itself, list other Secret IDs, or even the Role ID.
 ```bash
@@ -66,7 +68,23 @@ vault policy write jenkins jenkins.hcl
 ```
 And generate a token for Jenkins to login into Vault. This token should have a relatively large TTL, but will have to be rotated
 ```bash
-vault token create -policy=jenkins -ttl=365d
+$ vault token create -policy=jenkins -ttl=8760h
+WARNING! The following warnings were returned from Vault:
+
+  * TTL of "8760h0m0s" exceeded the effective max_ttl of "768h0m0s"; TTL value
+  is capped accordingly
+
+  * Policy "jenkins" does not exist
+
+Key                  Value
+---                  -----
+token                s.mC73IMlyVYj79z7XhhRk5zh6
+token_accessor       s4bpAFaEDIOpiwS7JKwS9WJQ
+token_duration       768h
+token_renewable      true
+token_policies       ["default" "jenkins"]
+identity_policies    []
+policies             ["default" "jenkins"]
 ```
 In this way we’re minimizing attack vectors:
 * Jenkins only knows it’s Vault Token (and potentially the role-id) but doesn’t know the secret-id, which is generated at pipeline runtime and it’s for one time use only.
