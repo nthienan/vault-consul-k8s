@@ -13,6 +13,16 @@ path "sys/policies/*" {
   capabilities = ["create", "read", "update", "delete", "list", "sudo"]
 }
 
+# Manage database config
+path "database/config/*" {
+  capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+}
+
+# Manage database role
+path "database/roles/*" {
+  capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+}
+
 # List, create, update, and delete key/value secrets
 path "secret/*" {
   capabilities = ["create", "read", "update", "delete", "list", "sudo"]
