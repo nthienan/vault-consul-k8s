@@ -23,6 +23,10 @@ path "database/roles/*" {
   capabilities = ["create", "read", "update", "delete", "list", "sudo"]
 }
 
+path "database/creds/*" {
+  capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+}
+
 # List, create, update, and delete key/value secrets
 path "secret/*" {
   capabilities = ["create", "read", "update", "delete", "list", "sudo"]
@@ -39,4 +43,9 @@ path "sys/mounts/*" {
 # Read health checks
 path "sys/health" {
   capabilities = ["read", "sudo"]
+}
+
+# Manage lease
+path "sys/leases/*" {
+  capabilities = ["create", "read", "update", "delete", "list", "sudo"]
 }
