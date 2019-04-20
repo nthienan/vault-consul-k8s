@@ -90,3 +90,13 @@ spec:
         - name: config-volume
           configMap:
             name: kubernetes-vault
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: run
+                operator: In
+                values:
+                - kubernetes-vault
+            topologyKey: kubernetes.io/hostname
