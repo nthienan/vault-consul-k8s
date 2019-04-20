@@ -173,7 +173,9 @@
     ```
   * Create a token role for Kubernetes-Vault that generates a 6 hour periodic token:
     ```bash
-    $ vault write auth/token/roles/kubernetes-vault allowed_policies=kubernetes-vault period=6h
+    $ vault write auth/token/roles/kubernetes-vault \
+        allowed_policies=kubernetes-vault \
+        period=6h
     Success! Data written to: auth/token/roles/kubernetes-vault
     ```
 - Generate the token for kubernetes-vault
