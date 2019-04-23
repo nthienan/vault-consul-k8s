@@ -49,3 +49,11 @@ path "sys/health" {
 path "sys/leases/*" {
   capabilities = ["create", "read", "update", "delete", "list", "sudo"]
 }
+
+# Kubernetes-Vault controller
+path "root-ca/*" {
+  capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+}
+path "intermediate-ca/*" {
+  capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+}

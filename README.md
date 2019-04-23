@@ -13,7 +13,7 @@ Please refer [consul/README.md](consul/README.md) for deploying Consul cluster a
 In additional, you can refer [Vault Reference Architecture](https://learn.hashicorp.com/vault/operations/ops-reference-architecture) for more details.
 
 ### Demo
-- [Scenario 1: Legacy applications that don’t run on Kubernetes](https://github.com/nthienan/ci-sample)
-- Scenario 2: Legacy applications that run on Kubernetes - TODO
-- [Scenario 3: New applications that use static credentials](https://github.com/nthienan/ci-sample/tree/vault)
-- [Scenario 4: New applications that use dynamic credentials](https://github.com/nthienan/ci-sample/tree/dynamic-credential)
+- [Scenario 1: Legacy applications that don’t run on Kubernetes](https://github.com/nthienan/ci-sample/tree/scenario-1)
+- [Scenario 2: Applications that run on Kubernetes](https://github.com/nthienan/ci-sample/tree/scenario-2)
+- [Scenario 3: New applications that use static credentials](https://github.com/nthienan/ci-sample/tree/scenario-3)
+- [Scenario 4: New applications that use dynamic credentials](https://github.com/nthienan/ci-sample/tree/scenario-4)

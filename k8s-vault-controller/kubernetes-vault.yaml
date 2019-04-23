@@ -51,7 +51,7 @@ data:
   kubernetes-vault.yml: |-
     vault:
       addr: http://vault.nthienan.com
-      token: s.o8WfFFCHPu5tD8HIB2bQ6TtL
+      token: s.Zfemt5yiFgV0JIQtFLU7ek8A
     kubernetes:
       watchNamespace: ${KUBERNETES_NAMESPACE}
       serviceNamespace: ${KUBERNETES_NAMESPACE}
